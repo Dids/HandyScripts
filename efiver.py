@@ -371,25 +371,28 @@ def getRawEFIVersion():
 
 
 def getEFIVersionsFromEFIUpdater():
-	cmd = [EFIUPDATER]
-	proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	output, err = proc.communicate()
-	lines = output.splitlines()
-	lineCount = len(lines)
-	
-	if lineCount < 3:
-		rawString = "Raw EFI Version string: %s" % getRawEFIVersion()
-		lines.insert(0, rawString)
-
-	rawVersion = lines[0].split(': ')[1].strip(' ')
-	currentVersion = lines[1].split(': ')[1].strip('[ ]')
-
-	if lineCount == 3:
-		updateVersion = lines[2].split(': ')[1].strip('[ ]')
-	else:
-		updateVersion = currentVersion
-
-	return (rawVersion, currentVersion, updateVersion)
+    cmd = [EFIUPDATER]
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, err = proc.communicate()
+    rawVersion = currentVersion = updateVersion = ""
+    for line in output.splitlines():
+        if line.lower().startswith("efiupdater"):
+            try:
+                rawVersion = line.split(": ")[1].split(" ")[0]
+            except:
+                pass
+        elif line.lower().startswith("efi currentversion"):
+            try:
+                currentVersion = line.split(": ")[1].strip("[ ]")
+            except:
+                pass
+        elif line.lower().startswith("efi updateversion"):
+            try:
+                updateVersion = line.split(":  ")[1].strip("[ ]")
+            except:
+                pass
+    updateVersion = currentVersion if not len(updateVersion) else updateVersion
+    return (rawVersion, currentVersion, updateVersion)
 
 
 def getEFIDate(efiDate):
