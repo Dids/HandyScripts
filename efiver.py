@@ -338,7 +338,7 @@ def getModelID(id):
 	elif lid.startswith('MP'):
 		number = lid.strip('MP')
 		return 'MacPro%s' % getModelNumberString(number)
-	
+
 	return 'Unknown'
 
 
@@ -376,20 +376,23 @@ def getEFIVersionsFromEFIUpdater():
     output, err = proc.communicate()
     rawVersion = currentVersion = updateVersion = ""
     for line in output.splitlines():
-        if line.lower().startswith("efiupdater"):
+        if "current efi version string" in line.lower():
             try:
-                rawVersion = line.split(": ")[1].split(" ")[0]
-            except:
+                rawVersion = line.split(": ")[-1]
+            except Exception as e:
+            	print(str(e))
                 pass
         elif line.lower().startswith("efi currentversion"):
             try:
                 currentVersion = line.split(": ")[1].strip("[ ]")
-            except:
+            except Exception as e:
+            	print(str(e))
                 pass
         elif line.lower().startswith("efi updateversion"):
             try:
                 updateVersion = line.split(":  ")[1].strip("[ ]")
-            except:
+            except Exception as e:
+            	print(str(e))
                 pass
     updateVersion = currentVersion if not len(updateVersion) else updateVersion
     return (rawVersion, currentVersion, updateVersion)
@@ -526,12 +529,12 @@ def main(argv):
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-m', dest='macOSVersion')
 	args = parser.parse_args()
-	
+
 	if args.macOSVersion == None:
 		macOSVersion = "10.13"
 	else:
 		macOSVersion = args.macOSVersion
-	
+
 	if not os.path.exists(FIRMWARE_UPDATE_PATH):
 		launchInstallSeed('update', 'FirmwareUpdate.pkg', FIRMWARE_UPDATE_PATH, macOSVersion)
 	if not os.path.exists(TMP_IA_PATH):
